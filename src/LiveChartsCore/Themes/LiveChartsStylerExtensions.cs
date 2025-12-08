@@ -250,6 +250,12 @@ public static class LiveChartsthemeExtensions
         return theme;
     }
 
+    public static Theme HasRuleForTimetableSeries(this Theme styler, Action<ITimetableSeries> predicate)
+    {
+        styler.TimetableSeriesBuilder.Add(predicate);
+        return styler;
+    }
+
     /// <summary>
     ///  Defines a style builder for <see cref="IHeatSeries"/> objects.
     /// </summary>

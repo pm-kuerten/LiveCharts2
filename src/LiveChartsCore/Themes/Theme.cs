@@ -314,6 +314,8 @@ public class Theme
     /// </value>
     public List<Action<IScatterSeries>> ScatterSeriesBuilder { get; set; } = [];
 
+    public List<Action<ITimetableSeries>> TimetableSeriesBuilder { get; set; } = [];
+
     /// <summary>
     /// Gets or sets the error series builder.
     /// </summary>
@@ -427,6 +429,11 @@ public class Theme
         if ((series.SeriesProperties & SeriesProperties.Scatter) == SeriesProperties.Scatter)
         {
             foreach (var rule in ScatterSeriesBuilder) rule((IScatterSeries)series);
+        }
+
+        if ((series.SeriesProperties & SeriesProperties.Timetable) == SeriesProperties.Timetable)
+        {
+            foreach (var rule in TimetableSeriesBuilder) rule((ITimetableSeries)series);
         }
 
         if ((series.SeriesProperties & SeriesProperties.StepLine) == SeriesProperties.StepLine)

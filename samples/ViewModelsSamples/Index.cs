@@ -6,6 +6,7 @@ public static class Index
     [
         "General/FirstChart",
 
+        "Timetable/Basic",
         "Design/LinearGradients",
         "Design/RadialGradients",
         "Design/StrokeDashArray",

@@ -144,5 +144,10 @@ public enum SeriesProperties
     /// <summary>
     /// The box series.
     /// </summary>
-    BoxSeries = 1 << 22
+    BoxSeries = 1 << 22,
+
+    /// <summary>
+    /// Timetable series
+    /// </summary>
+    Timetable = 1 << 23,
 }

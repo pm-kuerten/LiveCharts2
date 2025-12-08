@@ -274,6 +274,15 @@ public static class ThemesExtensions
                                 ? new SolidColorPaint(new(245, 245, 245))
                                 : new SolidColorPaint(new(45, 45, 45));
                     })
+                    .HasRuleForTimetableSeries(timetableSeries =>
+                    {
+                        var color = theme.GetSeriesColor(timetableSeries).AsSKColor();
+
+                        timetableSeries.Stroke = null;
+                        timetableSeries.Fill = new SolidColorPaint(color.WithAlpha(200));
+                        timetableSeries.Rx = 3;
+                        timetableSeries.Ry = 3;
+                    })
                     .HasRuleForPieSeries(pieSeries =>
                     {
                         var color = theme.GetSeriesColor(pieSeries).AsSKColor();

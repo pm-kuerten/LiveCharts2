@@ -260,6 +260,64 @@ public class DataFactory<TModel>
             : new SeriesBounds(PreviousKnownBounds = bounds, false);
     }
 
+    public virtual SeriesBounds GetTimetableBounds(
+        Chart chart,
+        ISeries series,
+        IPlane plane1,
+        IPlane plane2)
+    {
+        var stack = chart.SeriesContext.GetStackPosition(series, series.GetStackGroup());
+
+        var xMin = plane1.MinLimit ?? double.MinValue;
+        var xMax = plane1.MaxLimit ?? double.MaxValue;
+        var yMin = plane2.MinLimit ?? double.MinValue;
+        var yMax = plane2.MaxLimit ?? double.MaxValue;
+
+        var bounds = new DimensionalBounds();
+
+        ChartPoint? previous = null;
+
+        foreach (var point in series.Fetch(chart))
+        {
+            if (point.IsEmpty) continue;
+
+            var coordinate = point.Coordinate;
+
+            var primary = coordinate.PrimaryValue;
+            var secondary = coordinate.SecondaryValue;
+            var tertiary = coordinate.TertiaryValue;
+
+            if (stack is not null) primary = stack.StackPoint(point);
+
+            bounds.PrimaryBounds.AppendValue(primary);
+            bounds.SecondaryBounds.AppendValue(secondary + tertiary);
+            bounds.SecondaryBounds.AppendValue(secondary);
+            bounds.TertiaryBounds.AppendValue(tertiary);
+
+            if (primary >= yMin && primary <= yMax && secondary >= xMin && secondary <= xMax)
+            {
+                bounds.VisiblePrimaryBounds.AppendValue(primary);
+                bounds.SecondaryBounds.AppendValue(secondary + tertiary);
+                bounds.SecondaryBounds.AppendValue(secondary);
+                bounds.VisibleTertiaryBounds.AppendValue(tertiary);
+            }
+
+            if (previous is not null)
+            {
+                var previousCoordinate = previous.Coordinate;
+
+                var dx = Math.Abs(previousCoordinate.SecondaryValue - coordinate.SecondaryValue);
+                var dy = Math.Abs(previousCoordinate.PrimaryValue - coordinate.PrimaryValue);
+                if (dx < bounds.SecondaryBounds.MinDelta) bounds.SecondaryBounds.MinDelta = dx;
+                if (dy < bounds.PrimaryBounds.MinDelta) bounds.PrimaryBounds.MinDelta = dy;
+            }
+
+            previous = point;
+        }
+
+        return new SeriesBounds(bounds, false);
+    }
+
     /// <summary>
     /// Gets the pie bounds.
     /// </summary>
