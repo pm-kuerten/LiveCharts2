@@ -21,9 +21,9 @@
 
   <Import Project="../../../nuget.props" />
   <PropertyGroup>
-    <Description>
-      $(Description) This package includes all the required code and dependencies for rendering charts in WPF with SkiaSharp.
-    </Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageId>PM.$(AssemblyName)</PackageId>
   </PropertyGroup>
 
   <Import Project="../../../build/SharedLinks.Build.props" />
