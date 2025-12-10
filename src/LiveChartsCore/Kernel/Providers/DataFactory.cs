@@ -260,14 +260,20 @@ public class DataFactory<TModel>
             : new SeriesBounds(PreviousKnownBounds = bounds, false);
     }
 
+    /// <summary>
+    /// Gets the timetable bounds.
+    /// </summary>
+    /// <param name="chart">The chart.</param>
+    /// <param name="series">The series.</param>
+    /// <param name="plane1">The x.</param>
+    /// <param name="plane2">The y.</param>
+    /// <returns></returns>
     public virtual SeriesBounds GetTimetableBounds(
         Chart chart,
         ISeries series,
         IPlane plane1,
         IPlane plane2)
     {
-        var stack = chart.SeriesContext.GetStackPosition(series, series.GetStackGroup());
-
         var xMin = plane1.MinLimit ?? double.MinValue;
         var xMax = plane1.MaxLimit ?? double.MaxValue;
         var yMin = plane2.MinLimit ?? double.MinValue;
@@ -284,21 +290,20 @@ public class DataFactory<TModel>
             var coordinate = point.Coordinate;
 
             var primary = coordinate.PrimaryValue;
-            var secondary = coordinate.SecondaryValue;
+            var secondaryStart = coordinate.SecondaryValue;
             var tertiary = coordinate.TertiaryValue;
-
-            if (stack is not null) primary = stack.StackPoint(point);
+            var secondaryEnd = secondaryStart + tertiary;
 
             bounds.PrimaryBounds.AppendValue(primary);
-            bounds.SecondaryBounds.AppendValue(secondary + tertiary);
-            bounds.SecondaryBounds.AppendValue(secondary);
+            bounds.SecondaryBounds.AppendValue(secondaryEnd);
+            bounds.SecondaryBounds.AppendValue(secondaryStart);
             bounds.TertiaryBounds.AppendValue(tertiary);
 
-            if (primary >= yMin && primary <= yMax && secondary >= xMin && secondary <= xMax)
+            if (primary >= yMin && primary <= yMax && secondaryStart >= xMin && secondaryEnd <= xMax)
             {
                 bounds.VisiblePrimaryBounds.AppendValue(primary);
-                bounds.SecondaryBounds.AppendValue(secondary + tertiary);
-                bounds.SecondaryBounds.AppendValue(secondary);
+                bounds.VisibleSecondaryBounds.AppendValue(secondaryEnd);
+                bounds.VisibleSecondaryBounds.AppendValue(secondaryStart);
                 bounds.VisibleTertiaryBounds.AppendValue(tertiary);
             }
 
