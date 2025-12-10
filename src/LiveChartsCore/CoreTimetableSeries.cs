@@ -38,7 +38,8 @@ namespace LiveChartsCore;
 /// <typeparam name="TVisual">The type of the visual.</typeparam>
 /// <typeparam name="TLabel">The type of the label.</typeparam>
 /// <seealso cref="CartesianSeries{TModel, TVisual, TLabel}" />
-public class TimetableSeries<TModel, TVisual, TLabel>
+/// <seealso cref="ITimetableSeries" />
+public class CoreTimetableSeries<TModel, TVisual, TLabel>
     : StrokeAndFillCartesianSeries<TModel, TVisual, TLabel>, ITimetableSeries
         where TVisual : BoundedDrawnGeometry, new()
         where TLabel : BaseLabelGeometry, new()
@@ -53,7 +54,7 @@ public class TimetableSeries<TModel, TVisual, TLabel>
     /// Initializes a new instance of the <see cref="CoreScatterSeries{TModel, TVisual, TLabel, TErrorGeometry}"/> class.
     /// </summary>
     /// <param name="values">The values.</param>
-    public TimetableSeries(IReadOnlyCollection<TModel>? values)
+    public CoreTimetableSeries(IReadOnlyCollection<TModel>? values)
         : base(GetProperties(), values)
     {
         DataPadding = new LvcPoint(1, 1);

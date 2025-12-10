@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 
 namespace ViewModelsSamples.Timetable.Basic;
@@ -46,19 +47,19 @@ public class ViewModel
         }
         Series =
         [
-            new TimetableSeries<WeightedPoint, RoundedRectangleGeometry, LabelGeometry>(null)
+            new TimetableSeries<WeightedPoint>
             {
                 Values = values1,
                 Rx = 10,
                 Ry = 10
             },
-            new TimetableSeries<WeightedPoint, RoundedRectangleGeometry, LabelGeometry>(null)
+            new TimetableSeries<WeightedPoint>
             {
                 Values = values2,
                 Rx = 10,
                 Ry = 10
             },
-            new TimetableSeries<WeightedPoint, RoundedRectangleGeometry, LabelGeometry>(null)
+            new TimetableSeries<WeightedPoint>
             {
                 Values = values3,
                 Rx = 10,
