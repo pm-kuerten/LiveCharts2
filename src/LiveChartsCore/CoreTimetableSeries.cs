@@ -39,7 +39,7 @@ namespace LiveChartsCore;
 /// <typeparam name="TLabel">The type of the label.</typeparam>
 /// <seealso cref="CartesianSeries{TModel, TVisual, TLabel}" />
 /// <seealso cref="ITimetableSeries" />
-public class CoreTimetableSeries<TModel, TVisual, TLabel>
+public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
     : StrokeAndFillCartesianSeries<TModel, TVisual, TLabel>, ITimetableSeries
         where TVisual : BoundedDrawnGeometry, new()
         where TLabel : BaseLabelGeometry, new()
@@ -54,15 +54,14 @@ public class CoreTimetableSeries<TModel, TVisual, TLabel>
     /// Initializes a new instance of the <see cref="CoreScatterSeries{TModel, TVisual, TLabel, TErrorGeometry}"/> class.
     /// </summary>
     /// <param name="values">The values.</param>
-    public CoreTimetableSeries(IReadOnlyCollection<TModel>? values)
+    protected CoreTimetableSeries(IReadOnlyCollection<TModel>? values)
         : base(GetProperties(), values)
     {
         DataPadding = new LvcPoint(1, 1);
 
-        DataLabelsFormatter = (point) => $"{point.Coordinate.PrimaryValue}";
+        DataLabelsFormatter = point => $"{point.Coordinate.SecondaryValue}";
         YToolTipLabelFormatter = point =>
         {
-            //var series = (TimetableSeries<TModel, TVisual, TLabel>)point.Context.Series;
             var c = point.Coordinate;
             return $"X = {c.SecondaryValue}{Environment.NewLine}" +
                    $"Length = {c.TertiaryValue}";
@@ -155,7 +154,7 @@ public class CoreTimetableSeries<TModel, TVisual, TLabel>
                 geometryWidth = geometryHeight;
                 x -= halfGeometryHeight;
             }
-            else geometryWidth = xScale.ToPixels(coordinate.TertiaryValue) - xScale.ToPixels(pivot) + barOffset * 2;
+            else geometryWidth = xScale.ToPixels(coordinate.TertiaryValue) + barOffset * 2;
 
             if (point.IsEmpty || !IsVisible)
             {
