@@ -24,7 +24,9 @@
   <Import Project="./../../../build/RenderSettings.Build.props" />
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);SKIA_IMAGE_LVC;</DefineConstants>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageId>PM.$(AssemblyName)</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
