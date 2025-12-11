@@ -154,7 +154,7 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
                 geometryWidth = geometryHeight;
                 x -= halfGeometryHeight;
             }
-            else geometryWidth = xScale.ToPixels(coordinate.TertiaryValue) + barOffset * 2;
+            else geometryWidth = xScale.ToPixels(coordinate.SecondaryValue + coordinate.TertiaryValue) - x + barOffset * 2;
 
             if (point.IsEmpty || !IsVisible)
             {
