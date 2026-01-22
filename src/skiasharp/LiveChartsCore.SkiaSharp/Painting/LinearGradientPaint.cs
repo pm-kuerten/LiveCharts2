@@ -208,4 +208,7 @@ public class LinearGradientPaint(
         return
             _shader = SKShader.CreateLinearGradient(start, end, GradientStops, ColorPos, tileMode);
     }
+
+    private static SKRect GetDrawRectangleSize(SkiaSharpDrawingContext drawingContext) =>
+        new(0, 0, drawingContext.Info.Width, drawingContext.Info.Height);
 }
