@@ -122,6 +122,12 @@ public partial class XamlStackedRowSeries<TModel, TVisual, TLabel> : XamlSeries,
     where TLabel : BaseLabelGeometry, new()
 { }
 
+[XamlClass(typeof(TimetableSeries<,,>), TVisual = typeof(RoundedRectangleGeometry))]
+public partial class XamlTimetableSeries<TModel, TVisual, TLabel> : XamlSeries, ITimetableSeries, IInternalSeries
+    where TVisual : BoundedDrawnGeometry, new()
+    where TLabel : BaseLabelGeometry, new()
+{ }
+
 #if AVALONIA_LVC
 [XamlClass(typeof(PieSeries<,,>),
     FileHeader = "using TModel = LiveChartsCore.Defaults.ObservableValue;",

@@ -20,51 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using LiveChartsCore;
 using LiveChartsCore.Defaults;
-using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 
 namespace ViewModelsSamples.Timetable.Basic;
 
 public class ViewModel
 {
-    public ISeries[] Series { get; set; }
+    public WeightedPoint[] Values1 { get; }
+    public WeightedPoint[] Values2 { get; }
+    public WeightedPoint[] Values3 { get; }
 
     public ViewModel()
     {
         var r = new Random();
-        var values1 = new List<WeightedPoint>();
-        var values2 = new List<WeightedPoint>();
-        var values3 = new List<WeightedPoint>();
-        for (var i = 0; i < 10; i++)
-        {
-            values1.Add(new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)));
-            values2.Add(new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)));
-            values3.Add(new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)));
-        }
-        Series =
-        [
-            new TimetableSeries<WeightedPoint>
-            {
-                Values = values1,
-                Rx = 10,
-                Ry = 10
-            },
-            new TimetableSeries<WeightedPoint>
-            {
-                Values = values2,
-                Rx = 10,
-                Ry = 10
-            },
-            new TimetableSeries<WeightedPoint>
-            {
-                Values = values3,
-                Rx = 10,
-                Ry = 10
-            }
-        ];
+        Values1 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
+        Values2 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
+        Values3 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
     }
 }
