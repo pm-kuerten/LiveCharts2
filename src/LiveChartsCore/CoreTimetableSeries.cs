@@ -20,14 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
-using System.Collections.Generic;
 using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel;
 using LiveChartsCore.Kernel.Drawing;
 using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
-using LiveChartsCore.VisualElements;
+using LiveChartsCore.Motion;
+using LiveChartsCore.Painting;
 
 namespace LiveChartsCore;
 
@@ -44,12 +43,6 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
         where TVisual : BoundedDrawnGeometry, new()
         where TLabel : BaseLabelGeometry, new()
 {
-    private double _minGeometrySize = 6d;
-    private double _geometrySize = 24d;
-    private double _rx;
-    private double _ry;
-    private double _barOffset;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="CoreScatterSeries{TModel, TVisual, TLabel, TErrorGeometry}"/> class.
     /// </summary>
@@ -74,56 +67,72 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
     /// <value>
     /// The minimum size of the geometry.
     /// </value>
-    public double MinGeometrySize { get => _minGeometrySize; set => SetProperty(ref _minGeometrySize, value); }
+    public double MinGeometrySize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = 6d;
     /// <summary>
     /// Gets or sets the size of the geometry.
     /// </summary>
     /// <value>
     /// The size of the geometry.
     /// </value>
-    public double GeometrySize { get => _geometrySize; set => SetProperty(ref _geometrySize, value); }
+    public double GeometrySize
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = 24d;
 
     /// <inheritdoc cref="ITimetableSeries.Rx"/>
-    public double Rx { get => _rx; set => SetProperty(ref _rx, value); }
+    public double Rx
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     /// <inheritdoc cref="ITimetableSeries.Ry"/>
-    public double Ry { get => _ry; set => SetProperty(ref _ry, value); }
+    public double Ry
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     /// <inheritdoc />
-    public double BarOffset { get => _barOffset; set => SetProperty(ref _barOffset, value); }
+    public double BarOffset
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     /// <inheritdoc cref="ChartElement.Invalidate(Chart)"/>
     public override void Invalidate(Chart chart)
     {
         var cartesianChart = (CartesianChartEngine)chart;
-        var primaryAxis = cartesianChart.YAxes[ScalesYAt];
-        var secondaryAxis = cartesianChart.XAxes[ScalesXAt];
+        var primaryAxis = cartesianChart.GetYAxis(this);
+        var secondaryAxis = cartesianChart.GetXAxis(this);
 
         var drawLocation = cartesianChart.DrawMarginLocation;
         var drawMarginSize = cartesianChart.DrawMarginSize;
-        var xScale = new Scaler(drawLocation, drawMarginSize, secondaryAxis);
-        var yScale = new Scaler(drawLocation, drawMarginSize, primaryAxis);
+        var xScale = secondaryAxis.GetNextScaler(cartesianChart);
+        var yScale = primaryAxis.GetNextScaler(cartesianChart);
 
         var actualZIndex = ZIndex == 0 ? ((ISeries)this).SeriesId : ZIndex;
-        var clipping = GetClipRectangle(cartesianChart);
 
-        if (Fill is not null)
+        if (Fill is not null && Fill != Paint.Default)
         {
-            Fill.ZIndex = actualZIndex + 0.1;
-            Fill.SetClipRectangle(cartesianChart.Canvas, clipping);
-            cartesianChart.Canvas.AddDrawableTask(Fill);
+            Fill.ZIndex = actualZIndex + PaintConstants.SeriesFillZIndexOffset;
+            cartesianChart.Canvas.AddDrawableTask(Fill, zone: CanvasZone.DrawMargin);
         }
-        if (Stroke is not null)
+        if (Stroke is not null && Stroke != Paint.Default)
         {
-            Stroke.ZIndex = actualZIndex + 0.2;
-            Stroke.SetClipRectangle(cartesianChart.Canvas, clipping);
+            Stroke.ZIndex = actualZIndex + PaintConstants.SeriesStrokeZIndexOffset;
             cartesianChart.Canvas.AddDrawableTask(Stroke);
         }
-        if (DataLabelsPaint is not null)
+        if (ShowDataLabels && DataLabelsPaint is not null && DataLabelsPaint != Paint.Default)
         {
-            DataLabelsPaint.ZIndex = actualZIndex + 0.4;
-            DataLabelsPaint.SetClipRectangle(cartesianChart.Canvas, clipping);
-            cartesianChart.Canvas.AddDrawableTask(DataLabelsPaint);
+            DataLabelsPaint.ZIndex = actualZIndex + PaintConstants.SeriesGeometryStrokeZIndexOffset;
+            cartesianChart.Canvas.AddDrawableTask(DataLabelsPaint, zone: CanvasZone.DrawMargin);
         }
 
         var rx = (float)Rx;
@@ -143,7 +152,7 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
         foreach (var point in Fetch(cartesianChart))
         {
             var coordinate = point.Coordinate;
-            var visual = (TVisual?)point.Context.Visual;
+            var visual = point.Context.Visual as TVisual;
 
             var x = xScale.ToPixels(coordinate.SecondaryValue) - barOffset;
             var y = yScale.ToPixels(coordinate.PrimaryValue);
@@ -213,8 +222,10 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
                     svgVisual.SVGPath = GeometrySvg ?? throw new Exception("svg path is not defined");
             }
 
-            Fill?.AddGeometryToPaintTask(cartesianChart.Canvas, visual);
-            Stroke?.AddGeometryToPaintTask(cartesianChart.Canvas, visual);
+            if (Fill is not null && Fill != Paint.Default)
+                Fill.AddGeometryToPaintTask(cartesianChart.Canvas, visual);
+            if (Stroke is not null && Stroke != Paint.Default)
+                Stroke.AddGeometryToPaintTask(cartesianChart.Canvas, visual);
 
             var sizedGeometry = visual;
 
@@ -234,7 +245,7 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
 
             pointsCleanup.Clean(point);
 
-            if (DataLabelsPaint is not null)
+            if (ShowDataLabels && DataLabelsPaint is not null && DataLabelsPaint != Paint.Default)
             {
                 if (point.Context.Label is not TLabel label)
                 {
@@ -245,7 +256,9 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
                         RotateTransform = (float)DataLabelsRotation,
                         MaxWidth = (float)DataLabelsMaxWidth
                     };
-                    l.Animate(EasingFunction ?? cartesianChart.EasingFunction, AnimationsSpeed ?? cartesianChart.AnimationsSpeed);
+                    l.Animate(GetAnimation(cartesianChart),
+                        BaseLabelGeometry.XProperty,
+                        BaseLabelGeometry.YProperty);
                     label = l;
                     point.Context.Label = l;
                 }
@@ -258,7 +271,10 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
 
                 if (isFirstDraw)
                     label.CompleteTransition(
-                        nameof(label.TextSize), nameof(label.X), nameof(label.Y), nameof(label.RotateTransform));
+                        BaseLabelGeometry.TextSizeProperty,
+                        BaseLabelGeometry.XProperty,
+                        BaseLabelGeometry.YProperty,
+                        BaseLabelGeometry.RotateTransformProperty);
 
                 var m = label.Measure();
                 var labelPosition = GetLabelPosition(
@@ -333,51 +349,19 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
         return new SeriesBounds(dimensionalBounds, false);
     }
 
-    /// <inheritdoc cref="Series{TModel, TVisual, TLabel}.GetMiniaturesSketch"/>
-    [Obsolete($"Replaced by ${nameof(GetMiniatureGeometry)}")]
-    public override Sketch GetMiniaturesSketch()
-    {
-        var schedules = new List<PaintSchedule>();
-
-        if (Fill is not null) schedules.Add(BuildMiniatureSchedule(Fill, new TVisual()));
-        if (Stroke is not null) schedules.Add(BuildMiniatureSchedule(Stroke, new TVisual()));
-
-        return new Sketch(MiniatureShapeSize, MiniatureShapeSize, GeometrySvg)
-        {
-            PaintSchedules = schedules
-        };
-    }
-
-    /// <inheritdoc cref="Series{TModel, TVisual, TLabel}.GetMiniature"/>"/>
-    [Obsolete($"Replaced by ${nameof(GetMiniatureGeometry)}")]
-    public override IChartElement GetMiniature(ChartPoint? point, int zindex)
-    {
-        var typedPoint = point is null ? null : ConvertToTypedChartPoint(point);
-
-        return new GeometryVisual<TVisual, TLabel>
-        {
-            Fill = GetMiniatureFill(point, zindex + 1),
-            Stroke = GetMiniatureStroke(point, zindex + 2),
-            Width = MiniatureShapeSize,
-            Height = MiniatureShapeSize,
-            Rotation = typedPoint?.Visual?.RotateTransform ?? 0,
-            Svg = GeometrySvg,
-            ClippingMode = ClipMode.None
-        };
-    }
-
     /// <inheritdoc cref="Series{TModel, TVisual, TLabel}.GetMiniatureGeometry(ChartPoint)"/>
     public override IDrawnElement GetMiniatureGeometry(ChartPoint? point)
     {
-        var typedPoint = point is null ? null : ConvertToTypedChartPoint(point);
+        var v = point?.Context.Visual;
 
         var m = new TVisual
         {
-            Fill = GetMiniatureFill(point, 0),
-            Stroke = GetMiniatureStroke(point, 0),
+            Fill = v?.Fill ?? Fill,
+            Stroke = v?.Stroke ?? Stroke,
             Width = (float)MiniatureShapeSize,
             Height = (float)MiniatureShapeSize,
-            RotateTransform = typedPoint?.Visual?.RotateTransform ?? 0,
+            ClippingBounds = LvcRectangle.Empty,
+            RotateTransform = v?.RotateTransform ?? 0
         };
 
         if (m is IVariableSvgPath svg) svg.SVGPath = GeometrySvg;
@@ -408,15 +392,12 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
     /// <inheritdoc cref="SetDefaultPointTransitions(ChartPoint)"/>
     protected override void SetDefaultPointTransitions(ChartPoint chartPoint)
     {
-        var visual = (TVisual?)chartPoint.Context.Visual;
         var chart = chartPoint.Context.Chart;
+        if (chartPoint.Context.Visual is not TVisual visual) throw new Exception("Unable to initialize the point instance.");
 
-        if (visual is null) throw new Exception("Unable to initialize the point instance.");
+        var animation = GetAnimation(chart.CoreChart);
 
-        var easing = EasingFunction ?? chart.EasingFunction;
-        var speed = AnimationsSpeed ?? chart.AnimationsSpeed;
-
-        visual.Animate(easing, speed);
+        visual.Animate(animation);
     }
 
     /// <inheritdoc cref="SoftDeleteOrDisposePoint(ChartPoint, Scaler, Scaler)"/>
