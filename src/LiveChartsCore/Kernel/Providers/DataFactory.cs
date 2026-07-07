@@ -290,21 +290,34 @@ public class DataFactory<TModel>
             var coordinate = point.Coordinate;
 
             var primary = coordinate.PrimaryValue;
-            var secondaryStart = coordinate.SecondaryValue;
             var tertiary = coordinate.TertiaryValue;
-            var secondaryEnd = secondaryStart + tertiary;
+            double secondaryStart;
+            double secondaryEnd;
+            if (tertiary >= 0)
+            {
+                secondaryStart = coordinate.SecondaryValue;
+                secondaryEnd = secondaryStart + tertiary;
+            }
+            else
+            {
+                secondaryEnd = coordinate.SecondaryValue;
+                secondaryStart = secondaryEnd + tertiary;
+            }
+            var tertiaryValid = !double.IsInfinity(tertiary);
+            var secondaryStartValid = !double.IsInfinity(secondaryStart);
+            var secondaryEndValid = !double.IsInfinity(secondaryEnd);
 
             bounds.PrimaryBounds.AppendValue(primary);
-            bounds.SecondaryBounds.AppendValue(secondaryEnd);
-            bounds.SecondaryBounds.AppendValue(secondaryStart);
-            bounds.TertiaryBounds.AppendValue(tertiary);
+            if (secondaryEndValid) bounds.SecondaryBounds.AppendValue(secondaryEnd);
+            if (secondaryStartValid) bounds.SecondaryBounds.AppendValue(secondaryStart);
+            if (tertiaryValid) bounds.TertiaryBounds.AppendValue(tertiary);
 
-            if (primary >= yMin && primary <= yMax && secondaryStart >= xMin && secondaryEnd <= xMax)
+            if (primary >= yMin && primary <= yMax && (!secondaryStartValid || secondaryStart >= xMin) && (!secondaryEndValid || secondaryEnd <= xMax))
             {
                 bounds.VisiblePrimaryBounds.AppendValue(primary);
-                bounds.VisibleSecondaryBounds.AppendValue(secondaryEnd);
-                bounds.VisibleSecondaryBounds.AppendValue(secondaryStart);
-                bounds.VisibleTertiaryBounds.AppendValue(tertiary);
+                if (secondaryEndValid) bounds.VisibleSecondaryBounds.AppendValue(secondaryEnd);
+                if (secondaryStartValid) bounds.VisibleSecondaryBounds.AppendValue(secondaryStart);
+                if (tertiaryValid) bounds.VisibleTertiaryBounds.AppendValue(tertiary);
             }
 
             if (previous is not null)

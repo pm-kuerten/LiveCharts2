@@ -154,16 +154,33 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
             var coordinate = point.Coordinate;
             var visual = point.Context.Visual as TVisual;
 
-            var x = xScale.ToPixels(coordinate.SecondaryValue) - barOffset;
+            var x = xScale.ToPixels(coordinate.SecondaryValue);
             var y = yScale.ToPixels(coordinate.PrimaryValue);
 
             float geometryWidth;
-            if (coordinate.TertiaryValue == 0)
+            switch (coordinate.TertiaryValue)
             {
-                geometryWidth = geometryHeight;
-                x -= halfGeometryHeight;
+                case 0:
+                    geometryWidth = geometryHeight;
+                    x -= halfGeometryHeight;
+                    break;
+                case double.PositiveInfinity:
+                    geometryWidth = chart.ControlSize.Width - x;
+                    x -= barOffset;
+                    break;
+                case double.NegativeInfinity:
+                    geometryWidth = x;
+                    x -= geometryWidth - barOffset;
+                    break;
+                case < 0:
+                    geometryWidth = x - xScale.ToPixels(coordinate.SecondaryValue + coordinate.TertiaryValue) + barOffset * 2;
+                    x -= geometryWidth - barOffset;
+                    break;
+                default:
+                    geometryWidth = xScale.ToPixels(coordinate.SecondaryValue + coordinate.TertiaryValue) - x + barOffset * 2;
+                    x -= barOffset;
+                    break;
             }
-            else geometryWidth = xScale.ToPixels(coordinate.SecondaryValue + coordinate.TertiaryValue) - x + barOffset * 2;
 
             if (point.IsEmpty || !IsVisible)
             {
@@ -348,6 +365,9 @@ public abstract class CoreTimetableSeries<TModel, TVisual, TLabel>
 
         return new SeriesBounds(dimensionalBounds, false);
     }
+
+    /// <inheritdoc />
+    protected override double GetRequestedPrimaryOffset() => 0.5;
 
     /// <inheritdoc cref="Series{TModel, TVisual, TLabel}.GetMiniatureGeometry(ChartPoint)"/>
     public override IDrawnElement GetMiniatureGeometry(ChartPoint? point)

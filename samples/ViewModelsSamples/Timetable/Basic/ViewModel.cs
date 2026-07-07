@@ -26,15 +26,7 @@ namespace ViewModelsSamples.Timetable.Basic;
 
 public class ViewModel
 {
-    public WeightedPoint[] Values1 { get; }
-    public WeightedPoint[] Values2 { get; }
-    public WeightedPoint[] Values3 { get; }
-
-    public ViewModel()
-    {
-        var r = new Random();
-        Values1 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
-        Values2 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
-        Values3 = [.. Enumerable.Range(0, 10).Select(_ => new WeightedPoint(r.Next(0, 20), r.Next(0, 20), r.Next(0, 5)))];
-    }
+    public WeightedPoint[] Values1 { get; set; } = [new(12, 16, -5), new(7, 14, 2)];
+    public WeightedPoint[] Values2 { get; set; } = [new(9, 17 - 4, double.NegativeInfinity), new(8, 11, 20)];
+    public WeightedPoint[] Values3 { get; set; } = [new(7, 17, double.PositiveInfinity), new(5, 17, 0)];
 }
