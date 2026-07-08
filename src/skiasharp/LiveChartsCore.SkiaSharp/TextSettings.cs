@@ -44,17 +44,16 @@ public class TextSettings
     public SkiaPaint.FontBuilderDelegate FontBuilder { get; set; }
         = (paint, typeface, size) =>
         {
-            paint.TextSize = size;
-            paint.Typeface = typeface;
             paint.IsAntialias = true;
-            paint.LcdRenderText = true;
 
             // could this be improved?
             // like creating font settings based on the screen dpi, etc.
             return new SKFont(typeface, size)
             {
                 Edging = SKFontEdging.SubpixelAntialias,
-                Hinting = SKFontHinting.Normal
+                Hinting = SKFontHinting.Normal,
+                Typeface = typeface,
+                Subpixel = true
             };
         };
 

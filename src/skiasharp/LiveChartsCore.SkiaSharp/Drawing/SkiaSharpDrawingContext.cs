@@ -84,8 +84,11 @@ public class SkiaSharpDrawingContext(
         using var textPaint = new SKPaint
         {
             Color = SKColors.White,
-            TextSize = 14,
             IsAntialias = true,
+        };
+        using var textFont = new SKFont
+        {
+            Size = 14,
             Typeface = SkiaPaint.FallbackTypeface
         };
 
@@ -97,7 +100,7 @@ public class SkiaSharpDrawingContext(
 
         var lines = log.Split('`');
 
-        Canvas.DrawRect(new(10, 0, 400, (textPaint.TextSize + 4f) * lines.Length), backgroundPaint);
+        Canvas.DrawRect(new(10, 0, 400, (textFont.Size + 4f) * lines.Length), backgroundPaint);
 
         for (var i = 0; i < lines.Length; i++)
         {
@@ -105,7 +108,9 @@ public class SkiaSharpDrawingContext(
             if (string.IsNullOrWhiteSpace(line)) continue;
             Canvas.DrawText(
                 line,
-                new SKPoint(10, 10 + 2 + (textPaint.TextSize + 4f) * i),
+                new SKPoint(10, 10 + 2 + (textFont.Size + 4f) * i),
+                SKTextAlign.Left,
+                textFont,
                 textPaint);
         }
     }

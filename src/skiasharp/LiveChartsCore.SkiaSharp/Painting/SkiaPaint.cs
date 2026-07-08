@@ -227,8 +227,6 @@ public abstract class SkiaPaint(float strokeThickness = 1f, float strokeMiter = 
 
     internal override void DisposeTask()
     {
-        if (_skiaPaint is not null && !IsGlobalSKTypeface)
-            _skiaPaint.Typeface?.Dispose();
 
         PathEffect?.Dispose();
         ImageFilter?.Dispose();

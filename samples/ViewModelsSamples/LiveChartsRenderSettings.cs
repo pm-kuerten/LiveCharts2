@@ -47,15 +47,15 @@ public static partial class CustomLiveChartsExtensions
                     // This is the default used by LiveCharts:
                     // you can improve this function to suit your needs.
 
-                    paint.TextSize = size;
-                    paint.Typeface = typeface;
                     paint.IsAntialias = true;
-                    paint.LcdRenderText = true;
 
                     return new SKFont(typeface, size)
                     {
                         Edging = SKFontEdging.SubpixelAntialias,
-                        Hinting = SKFontHinting.Normal
+                        Hinting = SKFontHinting.Normal,
+                        Size = size,
+                        Typeface = typeface,
+                        Subpixel = true
                     };
                 }
             })

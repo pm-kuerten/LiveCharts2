@@ -29,8 +29,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="$(MinSkiaSharpVersion)" />
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="$(MinSkiaSharpVersion)" />
+    <PackageReference Include="SkiaSharp" Version="4.148.0" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="4.148.0" />
   </ItemGroup>
 
   <ItemGroup>

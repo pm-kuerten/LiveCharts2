@@ -124,7 +124,6 @@ internal static class DrawingTextExtensions
 
             LiveChartsSkiaSharp.DefaultTextSettings.DefaultTypeface ??= tokenResult.SuggestedTypeface;
             skFont.Typeface = tokenResult.SuggestedTypeface;
-            skPaint.Typeface = tokenResult.SuggestedTypeface;
         }
 
         var horizontalPadding = label.Padding.Left + label.Padding.Right;
@@ -297,7 +296,7 @@ internal static class DrawingTextExtensions
                 }
             }
 
-            var result = shaper.Shape(text, paint);
+            var result = shaper.Shape(text, font);
             var glyphs = Array.ConvertAll(result.Codepoints, cp => (ushort)cp);
 
             var builder = new SKTextBlobBuilder();
